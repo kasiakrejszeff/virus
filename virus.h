@@ -1,6 +1,8 @@
 #ifndef _VIRUS_
 #define _VIRUS_
 
+#include <string>
+
 class Virus {
 public:
 	typedef typename std::string id_type;

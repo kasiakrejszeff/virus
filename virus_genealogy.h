@@ -7,7 +7,7 @@ template <class Virus>
 class VirusGenealogy {
 	// Tworzy nową genealogię.
 	// Tworzy także węzęł wirusa macierzystego o identyfikatorze stem_id.
-	VirusGenealogy(Virus::id_type const &stem_id);
+	VirusGenealogy(typename Virus::id_type const &stem_id);
 
 };
 

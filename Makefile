@@ -4,7 +4,7 @@ OBJECTS=test
 
 all: $(OBJECTS)
 
-test: virus_genealogy.h test.cc
+test: virus_genealogy.h virus.h test.cc
 	$(CXX) $(CXXFLAGS) test.cc -o test
 	
 clean:

@@ -48,8 +48,10 @@ public:
 	// Zgłasza wyjątek TriedToRemoveStemVirus przy próbie usunięcia
 	// wirusa macierzystego.
 	void remove(typename Virus::id_type const &id);
-};
 
+private:
+
+};
 
 template <class Virus>
 VirusGenealogy<Virus>::VirusGenealogy(typename Virus::id_type const &stem_id) {

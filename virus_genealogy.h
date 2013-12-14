@@ -2,14 +2,35 @@
 #define _VIRUS_GENEALOGY_
 
 #include <exception>
+#include <map>
 // TODO Usunąć w ostatecznej wersji.
 #include <iostream>
 
-class VirusAlreadyCreated : public std::exception { };
+//
+// Wyjątki
+//
 
-class VirusNotFound : public std::exception { };
+class VirusAlreadyCreated : public std::exception {
+	virtual const char* what() const noexcept {
+		return "VirusAlreadyCreated";
+	}
+};
 
-class TriedToRemoveStemVirus : public std::exception { };
+class VirusNotFound : public std::exception {
+	virtual const char* what() const noexcept {
+		return "VirusNotFound";
+	}
+};
+
+class TriedToRemoveStemVirus : public std::exception {
+	virtual const char* what() const noexcept {
+		return "TriedToRemoveStemVirus";
+	}
+};
+
+//
+// Szablon klasy VirusGenealogy
+//
 
 template <class Virus>
 class VirusGenealogy {
@@ -61,11 +82,18 @@ public:
 
 private:
 
+
+	// map<typename Virus::id_type, tuple<Virus, std::vector<typename Virus::id_type>, std::std::vector<typename Virus::id_type>> 
+
 	// Konstruktor kopiujący oraz operator przypisania mają być niedostępne:
 	VirusGenealogy(VirusGenealogy<Virus> const &) = delete;
 	VirusGenealogy& operator=(VirusGenealogy<Virus> const &) = delete;
 
 };
+
+//
+// Implementacja metod klasy VirusGenealogy
+//
 
 template <class Virus>
 VirusGenealogy<Virus>::VirusGenealogy(typename Virus::id_type const &stem_id) {

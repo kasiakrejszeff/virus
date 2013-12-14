@@ -1,6 +1,16 @@
 #ifndef _VIRUS_GENEALOGY_
 #define _VIRUS_GENEALOGY_
 
+#include <exception>
+// TODO Usunąć w ostatecznej wersji.
+#include <iostream>
+
+class VirusAlreadyCreated : public std::exception { };
+
+class VirusNotFound : public std::exception { };
+
+class TriedToRemoveStemVirus : public std::exception { };
+
 template <class Virus>
 class VirusGenealogy {
 public:
@@ -51,10 +61,15 @@ public:
 
 private:
 
+	// Konstruktor kopiujący oraz operator przypisania mają być niedostępne:
+	VirusGenealogy(VirusGenealogy<Virus> const &) = delete;
+	VirusGenealogy& operator=(VirusGenealogy<Virus> const &) = delete;
+
 };
 
 template <class Virus>
 VirusGenealogy<Virus>::VirusGenealogy(typename Virus::id_type const &stem_id) {
+	std::cerr << "Create genealogy with stem_id = " << stem_id << std::endl;
 	// TODO
 }
 

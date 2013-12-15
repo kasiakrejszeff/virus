@@ -56,6 +56,8 @@ private:
 
 	// Sposób reprezentacji grafu?
 
+	// Myślę, że powinniśmy napisać klasę reprezentującą wierzchołek w grafie.
+
 	// Konstruktor kopiujący oraz operator przypisania mają być niedostępne:
 	VirusGenealogy(VirusGenealogy<Virus> const &) = delete;
 	VirusGenealogy& operator=(VirusGenealogy<Virus> const &) = delete;

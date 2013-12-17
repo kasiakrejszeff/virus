@@ -38,6 +38,7 @@ class TriedToRemoveStemVirus : public std::exception {
 template <class Virus>
 class VirusGenealogy {
 public:
+
 	VirusGenealogy(typename Virus::id_type const &stem_id);
 
 	typename Virus::id_type get_stem_id() const noexcept;
@@ -56,29 +57,50 @@ public:
 
 private:
 
+	class VirusNode;
+	typedef std::map<typename Virus::id_type, VirusNode *> virus_graph;
+
+	virus_graph graph;
+	typename Virus::id_type stem_id;
+
 	class VirusNode {
 	public:
+
 		typedef std::shared_ptr<VirusNode>  ChildPtr;
 		typedef std::  weak_ptr<VirusNode> ParentPtr;
 
 		std::vector<ChildPtr> children;
 		std::vector<ParentPtr> parents;
 
+		virus_graph * containing_graph;
+		typename virus_graph::iterator position_in_graph;
+
+		Virus my_virus;
+
 		typename Virus::id_type id;
 
-		// VirusNode()
+		VirusNode(typename Virus::id_type id, virus_graph * g, typename virus_graph::iterator p) :
+			containing_graph(g),
+			position_in_graph(p),
+			my_virus(Virus(id))
+		{ }
+
+		~VirusNode() {
+			*containing_graph.erase(position_in_graph);
+		}
+
+		void connect_parent(typename Virus::id_type &parent_id) {
+			parents.push_back(ParentPtr(*containing_graph[parent_id]));
+		}
+
+		void connect_child(typename Virus::id_type &child_id) {
+			children.push_back(ChildPtr(*containing_graph[child_id]));
+		}
 	};
-
-	typedef std::map<typename Virus::id_type, VirusNode *> virus_graph;
-
-	virus_graph graph;
-	typename Virus::id_type stem_id;
-
 	
 	// Konstruktor kopiujący oraz operator przypisania mają być niedostępne:
 	VirusGenealogy(VirusGenealogy<Virus> const &) = delete;
 	VirusGenealogy& operator=(VirusGenealogy<Virus> const &) = delete;
-
 };
 
 //
@@ -102,15 +124,16 @@ typename Virus::id_type VirusGenealogy<Virus>::get_stem_id() const noexcept {
 // Zwraca listę identyfikatorów bezpośrednich następników wirusa
 // o podanym identyfikatorze.
 // Zgłasza wyjątek VirusNotFound, jeśli dany wirus nie istnieje.
-/*template <class Virus>
+template <class Virus>
 std::vector<typename Virus::id_type> VirusGenealogy<Virus>::get_children(typename Virus::id_type const &id) const {
-
+	std::vector<typename Virus::id_type> result;
+	return result;
 }
 
 // Zwraca listę identyfikatorów bezpośrednich poprzedników wirusa
 // o podanym identyfikatorze.
 // Zgłasza wyjątek VirusNotFound, jeśli dany wirus nie istnieje.
-template <class Virus>
+/*template <class Virus>
 std::vector<typename Virus::id_type> VirusGenealogy<Virus>::get_parents(typename Virus::id_type const &id) const {
 
 }

@@ -3,6 +3,8 @@
 
 #include <exception>
 #include <map>
+#include <vector>
+#include <memory>
 
 // TODO Usunąć w ostatecznej wersji.
 #include <iostream>
@@ -54,10 +56,23 @@ public:
 
 private:
 
-	// Sposób reprezentacji grafu?
+	class VirusNode {
+	public:
+		typedef std::shared_ptr<VirusNode>  ChildPtr;
+		typedef std::  weak_ptr<VirusNode> ParentPtr;
 
-	// Myślę, że powinniśmy napisać klasę reprezentującą wierzchołek w grafie.
+		std::vector<ChildPtr> children;
+		std::vector<ParentPtr> parents;
 
+		typename Virus::id_type id;
+
+		
+
+	};
+
+	std::map<typename Virus::id_type, /*VirusGenealogy<Virus>::*/VirusNode *> mapa;
+
+	
 	// Konstruktor kopiujący oraz operator przypisania mają być niedostępne:
 	VirusGenealogy(VirusGenealogy<Virus> const &) = delete;
 	VirusGenealogy& operator=(VirusGenealogy<Virus> const &) = delete;

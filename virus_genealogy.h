@@ -12,18 +12,21 @@
 //
 
 class VirusAlreadyCreated : public std::exception {
+public:
 	virtual const char* what() const noexcept {
 		return "VirusAlreadyCreated";
 	}
 };
 
 class VirusNotFound : public std::exception {
+public:
 	virtual const char* what() const noexcept {
 		return "VirusNotFound";
 	}
 };
 
 class TriedToRemoveStemVirus : public std::exception {
+public:
 	virtual const char* what() const noexcept {
 		return "TriedToRemoveStemVirus";
 	}
@@ -45,16 +48,14 @@ class VirusGenealogy {
 
 public:
 
-	VirusGenealogy(typename Virus::id_type const &stem_id)
-		: stem_id(stem_id)
-	{
+	VirusGenealogy(typename Virus::id_type const &stem_id) : stem_id(stem_id) {
 		node_shared_ptr node_ptr(new VirusNode(stem_id, &graph));
 		std::pair<virus_graph_iterator, bool> result = graph.insert(make_pair(stem_id, node_ptr.get()));
 		node_ptr->set_position(result.first);
 		stem_node_ptr = node_ptr;
 	};
 
-	typename Virus::id_type get_stem_id() const noexcept {
+	typename Virus::id_type get_stem_id() const {
 		return stem_id;
 	}
 
@@ -117,28 +118,28 @@ public:
 			node_ptr->parents.insert(tmp->second);
 		}
 
-		auto parent_ptr_it = node_ptr->parents.begin();
-
+		// Do tego momentu wierzchołek nie ma jeszcze żadnych powiązań
+		// z grafem, zatem jeśli coś pójdzie nie tak, zostanie usunięty.
+		// =============================================================
 		// Początek modyfikacji zawartości grafu. Jeśli zostanie
 		// rzucony wyjątek, modyfikacja zostanie cofnięta.
 
 		std::pair<virus_graph_iterator, bool> result = graph.insert(make_pair(id, node_ptr.get()));
 		node_ptr->set_position(result.first);
-		assert(result.second); // ?? 
 
 		try {
-			for (; parent_ptr_it != node_ptr->parents.end(); ++parent_ptr_it) {
-				(*parent_ptr_it)->children.insert(node_shared_ptr(node_ptr));
+			for (auto parent_ptr : node_ptr->parents) {
+				parent_ptr->children.insert(node_ptr);
 			}
 		}
 		catch (...) {
-			for (; parent_ptr_it != node_ptr->parents.begin();) {
-				--parent_ptr_it;
-				(*parent_ptr_it)->children.erase(node_shared_ptr(node_ptr));
+			for (auto parent_ptr : node_ptr->parents) {
+				parent_ptr->children.erase(node_ptr);
 			}
-
-			graph.erase(result.first);
-			throw; // Rzucamy aktywny wyjątek dalej
+			throw;
+			// Rzucamy aktywny wyjątek dalej.
+			// Jeśli wystąpił błąd, wierzchołek zostanie
+			// usunięty z mapy przez swój destruktor.
 		}
 	}
 
@@ -169,13 +170,15 @@ public:
 		if (id == stem_id)
 			throw TriedToRemoveStemVirus();
 
+		// Usuwam ten wskaźnik ze wszystkich rodziców, będzie to w konsekwencji jedyny shared_ptr
+		// wskazujący na zadany wierzchołek. Zatem po zakonczeniu wywołania tej procedury wierzcholek
+		// zostanie usunięty.
 		node_shared_ptr node = graph.find(id)->second->shared_from_this();
 
 		for (auto &parent : node->parents) {
 			// Usuwanie jest noexcept:
 			parent->children.erase(node);
 		}
-
 	}
 
 private:
@@ -199,23 +202,26 @@ private:
 
 		virus_graph * containing_graph;
 		virus_graph_iterator position;
+		bool is_position_valid;
 
 		typename Virus::id_type id;
 		Virus my_virus;
 
 		VirusNode(typename Virus::id_type id, virus_graph * g) :
 			containing_graph(g),
+			is_position_valid(false),
 			id(id),
 			my_virus(Virus(id))
 		{ }
 
-		~VirusNode() {
-			if (containing_graph != nullptr)
+		~VirusNode() noexcept {
+			if (containing_graph != nullptr && is_position_valid)
 				containing_graph->erase(position);
 		}
 
 		void set_position(virus_graph_iterator const &it) {
 			position = it;
+			is_position_valid = true;
 		}
 	};
 };

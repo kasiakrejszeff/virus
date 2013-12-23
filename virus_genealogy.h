@@ -102,6 +102,9 @@ public:
 		if (graph.find(id) != graph.end())
 			throw VirusAlreadyCreated();
 
+		if (parent_ids.empty())
+			throw VirusNotFound();
+
 		// Dziecko otrzymuje wskaźniki na swoich poprzedników.
 		node_shared_ptr node_ptr(new VirusNode(id, &graph));
 

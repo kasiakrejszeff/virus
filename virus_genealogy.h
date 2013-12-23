@@ -142,9 +142,39 @@ public:
 		}
 	}
 
-	void connect(typename Virus::id_type const &child_id, typename Virus::id_type const &parent_id);
-	void remove(typename Virus::id_type const &id) {
+	void connect(typename Virus::id_type const &child_id, typename Virus::id_type const &parent_id) {
+		if (!exists(child_id) || !exists(parent_id))
+			throw VirusNotFound();
 
+		VirusNode * child  = graph.find( child_id)->second;
+		VirusNode * parent = graph.find(parent_id)->second;
+
+		node_shared_ptr child_ptr = child->shared_from_this();
+
+		parent->children.insert(child_ptr);
+
+		try {
+			child->parents.insert(parent);
+		}
+		catch (...) {
+			parent->children.erase(child_ptr);
+			throw;
+		}
+	}
+
+	void remove(typename Virus::id_type const &id) {
+		if (!exists(id))
+			throw VirusNotFound();
+
+		if (id == stem_id)
+			throw TriedToRemoveStemVirus();
+
+		node_shared_ptr node = graph.find(id)->second->shared_from_this();
+
+		for (auto &parent : node->parents) {
+			// Usuwanie jest noexcept:
+			parent->children.erase(node);
+		}
 
 	}
 
@@ -162,7 +192,7 @@ private:
 	// Klasa reprezentująca wierzchołek w grafie
 	//
 
-	class VirusNode {
+	class VirusNode : public std::enable_shared_from_this<VirusNode> {
 	public:
 		std::set<node_shared_ptr> children;
 		std::set<VirusNode *>     parents;

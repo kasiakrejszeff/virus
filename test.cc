@@ -10,8 +10,9 @@
 int main() {
 	VirusGenealogy<Virus> gen("A1H1");
 	Virus::id_type const id1 = gen.get_stem_id();
-	/*assert(gen.exists(id1));
-	assert(gen.get_parents(id1).size() == 0);
+	
+	assert(gen.exists(id1));
+	/*assert(gen.get_parents(id1).size() == 0);
 	gen.create("A", id1);
 	gen.create("B", id1);
 	assert(gen.get_children(id1).size() == 2);

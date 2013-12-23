@@ -10,14 +10,13 @@
 int main() {
 	VirusGenealogy<Virus> gen("A1H1");
 	Virus::id_type const id1 = gen.get_stem_id();
-	
 	assert(gen.exists(id1));
-	/*assert(gen.get_parents(id1).size() == 0);
+	assert(gen.get_parents(id1).size() == 0);
 	gen.create("A", id1);
 	gen.create("B", id1);
 	assert(gen.get_children(id1).size() == 2);
 	gen.create("C", "A");
-	gen.connect("C", "B");
+	/*gen.connect("C", "B");
 	assert(gen.get_parents("C").size() == 2);
 	assert(gen.get_children("A").size() == 1);
 	std::vector<Virus::id_type> parents;

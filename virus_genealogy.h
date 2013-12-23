@@ -62,14 +62,24 @@ public:
 	}
 
 	std::vector<typename Virus::id_type> get_children(typename Virus::id_type const &id) const {
-		// TODO
+		if (!exists(id))
+			throw VirusNotFound();
+
 		std::vector<typename Virus::id_type> result;
+		for (auto child : graph.find(id)->second->children)
+			result.push_back(child->id);
+
 		return result;
 	}
 
 	std::vector<typename Virus::id_type> get_parents (typename Virus::id_type const &id) const {
-		// TODO
+		if (!exists(id))
+			throw VirusNotFound();
+
 		std::vector<typename Virus::id_type> result;
+		for (auto parent : graph.find(id)->second->parents)
+			result.push_back(parent->id);
+
 		return result;
 	}
 
@@ -77,7 +87,12 @@ public:
 		return (graph.find(id) != graph.end());
 	}
 
-	Virus& operator[](typename Virus::id_type const &id) const;
+	Virus& operator[](typename Virus::id_type const &id) const {
+		if (!exists(id))
+			throw VirusNotFound();
+
+		return graph.find(id)->second->my_virus;
+	}
 
 	void create(typename Virus::id_type const &id, typename Virus::id_type const &parent_id) {
 		std::vector<typename Virus::id_type> v;
@@ -113,13 +128,13 @@ public:
 
 		try {
 			for (; parent_ptr_it != node_ptr->parents.end(); ++parent_ptr_it) {
-				parent_ptr_it->children.insert(node_shared_ptr(node_ptr));
+				(*parent_ptr_it)->children.insert(node_shared_ptr(node_ptr));
 			}
 		}
 		catch (...) {
 			for (; parent_ptr_it != node_ptr->parents.begin();) {
 				--parent_ptr_it;
-				parent_ptr_it->children.erase(node_shared_ptr(node_ptr));
+				(*parent_ptr_it)->children.erase(node_shared_ptr(node_ptr));
 			}
 
 			graph.erase(result.first);
@@ -155,12 +170,12 @@ private:
 		virus_graph * containing_graph;
 		virus_graph_iterator position;
 
+		typename Virus::id_type id;
 		Virus my_virus;
-
-		// typename Virus::id_type id;
 
 		VirusNode(typename Virus::id_type id, virus_graph * g) :
 			containing_graph(g),
+			id(id),
 			my_virus(Virus(id))
 		{ }
 

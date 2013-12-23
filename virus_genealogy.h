@@ -7,9 +7,6 @@
 #include <vector>
 #include <memory>
 
-// TODO Usunąć w ostatecznej wersji.
-#include <iostream>
-
 //
 // Wyjątki
 //
